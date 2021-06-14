@@ -12,7 +12,10 @@ class Vector
     size_t _capacity;
 
 public:
-    Vector() : digits(nullptr), _size(0), _capacity(0) { };
+    Vector() : _size(0), _capacity(0) 
+    {
+        digits = new T[1];
+    };
     Vector(const Vector<T>& vec);
     Vector(const T* vec, size_t num);
 
