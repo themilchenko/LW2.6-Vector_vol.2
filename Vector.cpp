@@ -3,355 +3,214 @@
 template <class T>
 Vector<T>::Vector(const T* vec, size_t num) : _size(num), _capacity(_size + 1)
 {
-    digits = new T[_capacity];
+	digits = new T[_capacity + 1];
 
-    for (int i = 0; i < _size; ++i)
-        digits[i] = vec[i];
+	for (int i = 0; i < _size; ++i)
+		digits[i] = vec[i];
 }
 
 template <class T>
 Vector<T>::Vector(const Vector<T>& vec) : _size(vec._size), _capacity(vec._capacity)
 {
-    if (_capacity == 1)
-        digits = new T[1];
-    else
-    {
-        digits = new T[_capacity];
+	if (_capacity == 1)
+		digits = new T[1];
+	else
+	{
+		if (digits != nullptr)
+			delete[] digits;
+		digits = new T[vec._capacity + 1];
 
-        for (int i = 0; i < _size; ++i)
-            digits[i] = vec.digits[i];
-    }
+		for (int i = 0; i < _size; ++i)
+			digits[i] = vec.digits[i];
+	}
 }
 
-template <typename T>
+template <class T>
 Vector<T>& Vector<T>::operator=(const Vector<T>& other)
 {
-    if (this != &other)
-    {
-        if (_capacity != other._capacity)
-        {
-            delete[] digits;
-            _capacity = other._capacity;
-            _size = other._size;
-            digits = new T[_capacity];
-        }
+	if (this != &other)
+	{
+		if (_capacity != other._capacity)
+		{
+			delete[] digits;
+			_capacity = other._capacity;
+			_size = other._size;
+			digits = new T[_capacity + 1];
+		}
 
-        for (int i = 0; i < _size; ++i)
-            digits[i] = other.digits[i];
-    }
+		for (int i = 0; i < _size; ++i)
+			digits[i] = other.digits[i];
+	}
 
-    return *this;
+	return *this;
 }
 
-template <typename T>
+template <class T>
 void Vector<T>::reserve(size_t num)
 {
-    if (num > _capacity)
-    {
-        _capacity = num;
+	if (num > _capacity)
+	{
+		_capacity = num;
 
-        T *temp;
-        temp = new T[_size];
-        for (size_t i = 0; i < _size; ++i)
-            temp[i] = digits[i];
+		T* temp = new T[_capacity + 1];
 
-        delete[] digits;
-        digits = new T[_capacity];
-        for (size_t i = 0; i < _size; ++i)
-            digits[i] = temp[i];
+		for (size_t i = 0; i < _size; ++i)
+			temp[i] = digits[i];
 
-        delete[] temp;
-    }
-
+		delete[] digits;
+		digits = temp;
+	}
 }
 
-template <typename T>
+template <class T>
 VectorIterator<T> Vector<T>::insert(const VectorIterator<T>& it, T&& element)
 {
-    _size++;
+	_size++;
 
-    if (_capacity >= _size)
-    {
-        T* temp = new T[std::distance(it, this->end()) + 1];
-        size_t t_count = 0;
-        for (auto iter = it; iter != this->end() - 1; iter++)  /*копирование второй части массива во временный массив*/
-        {
-            temp[t_count] = *iter;
-            t_count++;
-        }
+	if (_capacity > _size)  // если максимальная величина не превышает текущий размер
+	{
+		int dif = std::distance(begin(), it);
 
-        size_t position = std::distance(this->begin(), it);
-        digits[std::distance(this->begin(), it)] = element;
+		for (size_t i = _size; i > dif; i--)
+			digits[i] = digits[i - 1];
 
-        for (size_t i = 0; i < t_count; i++)
-            digits[std::distance(this->begin(), it + 1) + i] = temp[i];
+		*it = element;
 
-        delete[] temp;
+		return it;
+	}
+	else
+	{
+		int dif = std::distance(begin(), it);
 
-        return it - 1;
-    }
-    else
-    {
-        size_t pos = 0;     /* ищу индекс, где массив разделится (адрес итератора не будет актуальным при расширении вместимости вектора) */
-        for (auto iter = this->begin(); iter != it; iter++)
-            pos++;
+		reserve(1.5 * _capacity);
 
-        T* temp = new T[std::distance(it, this->end())];
-        size_t t_count = 0;
+		for (size_t i = _size; i > dif; i--)
+			digits[i] = digits[i - 1];
 
-        for (auto iter = it; iter != this->end(); iter++)  /*копирование второй части массива во временный массив*/
-        {
-            temp[t_count] = *iter;
-            t_count++;
-        }
+		*(begin() + dif) = element;
 
-        this->reserve(1.5 * _capacity);
-
-        digits[pos] = element;
-        T* res = new T(digits[pos]);
-        VectorIterator<T> result(res);
-        pos++;
-
-        for (size_t i = 0; i < t_count; i++)
-            digits[pos + i] = temp[i];
-        delete[] temp;
-
-        return result;
-    }
+		return begin() + dif;
+	}
 }
 
-template <typename T>
+template <class T>
 VectorIterator<T> Vector<T>::insert(const VectorIterator<T>& it, size_t count, T&& element)
 {
-    _size += count;
+	_size += count;
+	int dif = std::distance(begin(), it);
 
-    if (_capacity >= _size)
-    {
-        T* temp = new T[std::distance(it, this->end() - count)];
-        size_t t_count = 0;
-        for (auto iter = it; iter != this->end() - 1; iter++)  /*копирование второй части массива во временный массив*/
-        {
-            temp[t_count] = *iter;
-            t_count++;
-        }
+	
+	if (_capacity < _size)
+	{
+		if (_capacity == 1)
+			reserve(2);
+		else
+			reserve(1.5 * _size);
+	}
 
-        for (size_t i = 0; i < count; i++)
-            digits[std::distance(this->begin(), it + 1) - 1 + i] = element;
+	for (size_t i = _size + count - 1; i > dif - 1; i--)
+		digits[i] = digits[i - count];
 
-        for (size_t i = 0; i < t_count; i++)
-            digits[std::distance(this->begin(), it + 1) + count + i - 1] = temp[i];
-        delete[] temp;
+	for (int i = dif; i < dif + count; i++)
+		digits[i] = element;
 
-        return it - 1;
-    }
-    else
-    {
-        size_t pos = 0;
-        for (auto iter = this->begin(); iter != it; iter++)
-            pos++;
-
-        T* temp = new T[std::distance(it, this->end()) - count];
-        size_t t_count = 0;
-
-        for (auto iter = it; iter != this->end(); iter++)  /*копирование второй части массива во временный массив*/
-        {
-            temp[t_count] = *iter;
-            t_count++;
-        }
-
-        while (_capacity < _size)
-            this->reserve(1.5 * _capacity);
-
-        for (size_t i = 0; i < count; i++)
-        {
-            digits[pos] = element;
-            pos++;
-        }
-
-        T* res = new T(digits[pos]);
-        VectorIterator<T> result(res);
-        pos++;
-
-        for (size_t i = 0; i < t_count; i++)
-            digits[pos + i] = temp[i];
-        delete[] temp;
-
-        return result;
-    }
+	return begin() + dif + count;
 }
 
-template <typename T>
-VectorIterator<T> Vector<T>::insert(const VectorIterator<T>& _where,
-                                    const VectorIterator<T>& l_it,
-                                    const VectorIterator<T>& r_it)
+template <class T>
+VectorIterator<T> Vector<T>::insert(const VectorIterator<T>& _where, const VectorIterator<T>& l_it, const VectorIterator<T>& r_it)
 {
+	int dif = std::distance(l_it, r_it);
+	int beg_dif = std::distance(begin(), _where);
+	VectorIterator temp_it = l_it;
+	_size += dif;
 
-    if (_size + std::distance(l_it, r_it) <= _capacity)
-    {
-        size_t cur_size = std::distance(l_it, r_it);
-        T* temp = new T[std::distance(_where, this->end())];
-        size_t t_count = 0;
+	if (_capacity < _size)
+	{
+		if (_capacity == 1)
+			reserve(2);
+		else
+			reserve(1.5 * _size);
+	}
 
-        for (auto iter = _where; iter != this->end(); iter++) /*копирование второй части во вр. массив*/
-        {
-            temp[t_count] = *iter;
-            t_count++;
-        }
+	for (int i = _size + dif - 1; i > beg_dif - 1; i--)
+		digits[i] = digits[i - dif];
 
-        VectorIterator<T> it = l_it;
-        for (size_t i = 0; i < cur_size; i++) /*заполняем промежуток нужными элементами*/
-        {
-            digits[std::distance(this->begin(), _where + 1) - 1 + i] = *it;
-            it++;
-        }
+	for (int i = beg_dif; i < beg_dif + dif; i++)
+	{
+		digits[i] = *temp_it;
+		++temp_it;
+	}
 
-        for (size_t i = 0; i < t_count; i++)  /*вставляем то что держали во вр. массиве*/
-            digits[std::distance(this->begin(), _where + 1) + cur_size + i - 1] = temp[i];
-
-        _size += cur_size;
-        delete[] temp;
-        return VectorIterator<T>(this->begin() + std::distance(this->begin(), _where) + cur_size - 1);
-    }
-    else
-    {
-        size_t cur_size = std::distance(l_it, r_it);
-        size_t pos = 0;
-        for (auto iter = this->begin(); iter != _where; iter++)
-            pos++;
-
-        size_t tt = std::distance(_where, this->end());
-        T* temp = new T[std::distance(_where, this->end())];
-        size_t t_count = 0;
-
-        for (auto iter = _where; iter != this->end(); iter++)  /*копирование второй части массива во временный массив*/
-        {
-            temp[t_count] = *iter;
-            t_count++;
-        }
-
-        while (_capacity < _size + cur_size)    /*пока места не будет достаточно, выделяем память*/
-            this->reserve(1.5 * _capacity);
-
-        for (auto iter = l_it; iter != r_it; iter++)      /*копируем что требуется */
-        {
-            digits[pos] = *iter;
-            pos++;
-        }
-
-        T* res = new T(*(r_it - 1));
-
-        for (size_t i = 0; i < t_count; i++)  /*вставляем то что запоминали*/
-        {
-            digits[pos] = temp[i];
-            pos++;
-        }
-
-        _size += cur_size;
-        delete[] temp;
-        return VectorIterator<T>(res);
-    }
+	return begin() + beg_dif;
 }
 
-template <typename T>
+template <class T>
 VectorIterator<T> Vector<T>::erase(const VectorIterator<T>& it)
 {
-    T* temp = new T[std::distance(it + 1, this->end())];
-    size_t count = 0;
-
-    for (auto iter = it + 1; iter != this->end(); iter++)
-    {
-        temp[count] = *iter;
-        count++;
-    }
-
-    size_t pos = 0;
-    for (size_t i = std::distance(this->begin(), it); i < std::distance(this->begin(), this->end()); i++)
-    {
-        digits[i] = temp[pos];
-        pos++;
-    }
-
-    delete[] temp;
-    _size--;
-    return it;
+	size_t dif = std::distance(begin(), it);
+	for (int i = dif; i < _size - 1; i++)
+		digits[i] = digits[i + 1];
+	_size--;
+	return begin() + dif;
 }
 
-template <typename T>
+template <class T>
 VectorIterator<T> Vector<T>::erase(const VectorIterator<T>& l_it, const VectorIterator<T>& r_it)
 {
-    size_t distance = std::distance(l_it, r_it);
-    size_t count = 0;
-    T* temp = new T[std::distance(r_it, this->end())];
+	size_t beg_dif = std::distance(begin(), l_it);
+	size_t end_dif = std::distance(begin(), r_it);
+	size_t max_dif = std::distance(begin(), r_it);
+	size_t dif = end_dif - beg_dif + 1;
 
-    for (auto iter = r_it; iter != this->end(); iter++)
-    {
-        temp[count] = *iter;
-        count++;
-    }
+	for (int i = beg_dif; i < end_dif + 1; i++)
+		digits[i] = digits[i + dif];
 
-    size_t pos = 0;
-    for (size_t i = std::distance(this->begin(), l_it); i < std::distance(this->begin(), r_it); i++)
-    {
-        digits[i] = temp[pos];
-        pos++;
-    }
-
-    delete[] temp;
-    _size -= distance;
-    return l_it;
+	if (max_dif > _size - 1)
+		_size = _size - dif + 1;
+	else
+		_size -= dif;
+	return begin() + dif;
 }
 
-template <typename T>
+template <class T>
 void Vector<T>::push_back(T&& element)
 {
-    if (_capacity > _size)
-    {
-        _size++;
-        digits[_size - 1] = element;
-    }
-    else
-    {
-        if (_capacity == 0)
-            _capacity = 2;
-        reserve(1.5 * _capacity);
-        _size++;
-        digits[_size - 1] = element;
-    }
+	if (_capacity < _size)
+	{
+		if (_capacity == 1)
+			reserve(2);
+		else
+			reserve(1.5 * _size);
+	}
+	_size++;
+	digits[_size - 1] = element;
 }
 
-template <typename T>
+template <class T>
 void Vector<T>::resize(size_t actual_size)
 {
-    T* temp = new T[_size];
+	T* temp = new T[actual_size + 1];
 
-    for (size_t i = 0; i < _size; i++)
-        temp[i] = digits[i];
-
-    delete[] digits;
-    digits = new T[actual_size];
-
-    if (actual_size < _size)
-        for (size_t i = 0; i < actual_size; i++)
-            digits[i] = temp[i];
-    else
-    {
-        for (size_t i = 0; i < _size; i++)
-            digits[i] = temp[i];
-
-        //for (size_t i = _size; i < actual_size; i++)
-        //   digits[i] = 0;
-    }
-
-    delete[] temp;
-    _size = actual_size;
-    if (_capacity < _size)
-        _capacity = _size;
+	if (actual_size < _size)
+	{
+		_size = actual_size;
+	}
+	else
+	{
+		for (size_t i = 0; i < _size; ++i)
+			temp[i] = digits[i];
+		for (size_t i = _size; i < actual_size; ++i)
+			temp[i] = 0;
+		_size = actual_size;
+	}
+	digits = temp;
 }
 
-template <typename T>
+template <class T>
 void Vector<T>::swap(Vector<T>& other)
 {
-    Vector temp = *this;
-    *this = other;
-    other = temp;
+	Vector temp = *this;
+	*this = other;
+	other = temp;
 }
