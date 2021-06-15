@@ -122,7 +122,7 @@ VectorIterator<T> Vector<T>::insert(const VectorIterator<T>& _where, const Vecto
 {
 	int dif = std::distance(l_it, r_it);
 	int beg_dif = std::distance(begin(), _where);
-	VectorIterator temp_it = l_it;
+	VectorIterator<T> temp_it = l_it;
 	_size += dif;
 
 	if (_capacity < _size)
@@ -200,8 +200,6 @@ void Vector<T>::resize(size_t actual_size)
 	{
 		for (size_t i = 0; i < _size; ++i)
 			temp[i] = digits[i];
-		for (size_t i = _size; i < actual_size; ++i)
-			temp[i] = 0;
 		_size = actual_size;
 	}
 	digits = temp;
