@@ -14,7 +14,7 @@ class Vector
 public:
 	Vector() : _size(0), _capacity(0) 
 	{
-		digits = T int[1];
+		digits = new T[1];
 	};
 
 	Vector(const Vector<T>& vec);
@@ -22,7 +22,7 @@ public:
 
 	void print()
 	{
-		for (int i : *this)
+		for (T i : *this)
 			std::cout << i << ' ';
 		std::cout << std::endl;
 	}
@@ -38,10 +38,10 @@ public:
 	};
 
 	Vector& operator=(const Vector<T>& other);
-	VectorIterator begin() const { return VectorIterator<T>(&digits[0]); };
-	VectorIterator end() const { return VectorIterator<T>(&digits[_size]); };
+	VectorIterator<T> begin() const { return VectorIterator<T>(&digits[0]); };
+	VectorIterator<T> end() const { return VectorIterator<T>(&digits[_size]); };
 
-	int& at(size_t index)
+	T& at(size_t index)
 	{
 		if ((index < _size) && (index >= 0))
 			return digits[index];
@@ -49,12 +49,12 @@ public:
 			throw std::out_of_range("Out of range");
 	}
 
-	int& operator[](size_t index) { return digits[index]; };
+	T& operator[](size_t index) { return digits[index]; };
 
-	int& front() { return *begin(); };
-	int& back() { return *(end() - 1); };
+	T& front() { return *begin(); };
+	T& back() { return *(end() - 1); };
 
-	int* data() { return digits; };
+	T* data() { return digits; };
 
 	bool empty() const 
 	{
@@ -71,15 +71,15 @@ public:
 		delete[] digits;
 		_size = 0;
 
-		digits = new int[1];
+		digits = new T[1];
 	}
 
-	VectorIterator insert(const VectorIterator<T>& it, T&& element);
-	VectorIterator insert(const VectorIterator<T>& it, size_t count, T&& element);
-	VectorIterator insert(const VectorIterator<T>& _where, const VectorIterator<T>& l_it, const VectorIterator<T>& r_it);
-
-	VectorIterator erase(const VectorIterator<T>& it);
-	VectorIterator erase(const VectorIterator<T>& l_it, const VectorIterator<T>& r_it);
+	VectorIterator<T> insert(const VectorIterator<T>& it, T&& element);
+	VectorIterator<T> insert(const VectorIterator<T>& it, size_t count, T&& element);
+	VectorIterator<T> insert(const VectorIterator<T>& _where, const VectorIterator<T>& l_it, const VectorIterator<T>& r_it);
+				  
+	VectorIterator<T> erase(const VectorIterator<T>& it);
+	VectorIterator<T> erase(const VectorIterator<T>& l_it, const VectorIterator<T>& r_it);
 
 	void push_back(T&& element);
 	void pop_back() { _size--; };
