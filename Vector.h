@@ -4,89 +4,86 @@
 
 #pragma once
 
-template <typename T>
+template <class T>
 class Vector
 {
-    T* digits;
-    size_t _size;
-    size_t _capacity;
+	T* digits;
+	size_t _size;
+	size_t _capacity;
 
 public:
-    Vector() : _size(0), _capacity(0) 
-    {
-        digits = new T[1];
-    };
-    Vector(const Vector<T>& vec);
-    Vector(const T* vec, size_t num);
+	Vector() : _size(0), _capacity(0) 
+	{
+		digits = T int[1];
+	};
 
-    void print()
-    {
-        for (const T& i : *this)
-            std::cout << i << ' ';
-        std::cout << std::endl;
-    }
+	Vector(const Vector<T>& vec);
+	Vector(const T* vec, size_t num);
 
-    size_t size() const { return _size; };
-    size_t length() const { return _size; };
-    size_t capacity() const { return _capacity - 1; };
+	void print()
+	{
+		for (int i : *this)
+			std::cout << i << ' ';
+		std::cout << std::endl;
+	}
 
-    ~Vector()
-    {
-        if (digits != nullptr)
-            delete[] digits;
-    };
+	size_t size() const { return _size; };
+	size_t length() const { return _size; };
+	size_t capacity() const { return _capacity - 1; };
 
-    Vector& operator=(const Vector<T>& other);
-    VectorIterator<T> begin() const { return VectorIterator<T>(&digits[0]); };
-    VectorIterator<T> end() const { return VectorIterator<T>(&digits[_size]); };
+	~Vector() 
+	{
+		if (digits != nullptr)
+			delete[] digits; 
+	};
 
-    T& at(size_t index)
-    {
-        if ((index < _size) && (index >= 0))
-            return digits[index];
-        else
-            throw std::out_of_range("Out of range");
-    }
+	Vector& operator=(const Vector<T>& other);
+	VectorIterator begin() const { return VectorIterator<T>(&digits[0]); };
+	VectorIterator end() const { return VectorIterator<T>(&digits[_size]); };
 
-    T& operator[](size_t index) { return digits[index]; };
+	int& at(size_t index)
+	{
+		if ((index < _size) && (index >= 0))
+			return digits[index];
+		else
+			throw std::out_of_range("Out of range");
+	}
 
-    T& front() { return *this->begin(); };
-    T& back() { return *(this->end() - 1); };
+	int& operator[](size_t index) { return digits[index]; };
 
-    T* data() { return digits; };
+	int& front() { return *begin(); };
+	int& back() { return *(end() - 1); };
 
-    bool empty() const
-    {
-        if (_size == 0)
-            return true;
-        else
-            return false;
-    }
+	int* data() { return digits; };
 
-    void reserve(size_t num);
+	bool empty() const 
+	{
+		if (_size == 0)
+			return true;
+		else
+			return false;
+	}
 
-    void clear()
-    {
-        delete[] digits;
-        digits = nullptr;
-        _size = 0;
-        size_t temp = _capacity;
-        _capacity = 0;
-        reserve(temp);
-    }
+	void reserve(size_t num);
 
-    VectorIterator<T> insert(const VectorIterator<T>& it, T&& element);
-    VectorIterator<T> insert(const VectorIterator<T>& it, size_t count, T&& element);
-    VectorIterator<T> insert(const VectorIterator<T>& _where,
-                             const VectorIterator<T>& l_it,
-                             const VectorIterator<T>& r_it);
+	void clear() 
+	{
+		delete[] digits;
+		_size = 0;
 
-    VectorIterator<T> erase(const VectorIterator<T>& it);
-    VectorIterator<T> erase(const VectorIterator<T>& l_it, const VectorIterator<T>& r_it);
+		digits = new int[1];
+	}
 
-    void push_back(T&& element);
-    void pop_back() { _size--; };
+	VectorIterator insert(const VectorIterator<T>& it, T&& element);
+	VectorIterator insert(const VectorIterator<T>& it, size_t count, T&& element);
+	VectorIterator insert(const VectorIterator<T>& _where, const VectorIterator<T>& l_it, const VectorIterator<T>& r_it);
 
-    void resize(size_t actual_size);
-    void swap(Vector& other);
+	VectorIterator erase(const VectorIterator<T>& it);
+	VectorIterator erase(const VectorIterator<T>& l_it, const VectorIterator<T>& r_it);
+
+	void push_back(T&& element);
+	void pop_back() { _size--; };
+
+	void resize(size_t actual_size);
+	void swap(Vector<T>& other);
 };
